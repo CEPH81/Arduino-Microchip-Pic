@@ -99,36 +99,35 @@ void    Serial_print_u(unsigned long v, uint8_t base);
 void    Serial_print_f(double v, uint8_t digits);
 void    Serial_println0(void);
 
+void    Serial_printk(uint8_t kind, uint8_t base, ...);
+void    Serial_printkf(uint8_t digits, ...);
+
 /*
- * Serial.print(x) / Serial.print(x, base): la macro elige según el tipo.
- *   texto (char*)        -> Serial_print_s
- *   char                 -> Serial_write (imprime la letra)
- *   float / double       -> Serial_print_f (2 decimales, o los que se pidan)
- *   enteros sin signo    -> Serial_print_u
- *   el resto de enteros  -> Serial_print_i
+ * Serial.print(x) / Serial.print(x, base): la macro averigua el tipo de x
+ * al compilar y se lo pasa a Serial_printk() como un número:
+ *   1 texto (char*)   2 char (imprime la letra)   3 float / double
+ *   4 unsigned int    5 int    6 unsigned long    7 long
+ * PIC_C() convierte la comprobación de tipos en una constante normal
+ * (sizeof de un arreglo), que es lo que entienden los tres compiladores.
+ * Los float van por Serial_printkf(): si el programa no imprime ninguno,
+ * el código de punto flotante no entra en la flash.
  */
+#define PIC_C(e)        (sizeof(char[1 + (e)]) - 1u)
 #define PIC_T(x)        __typeof__((x) + 0)
 #define PIC_IS(x, t)    __builtin_types_compatible_p(PIC_T(x), t)
 #define PIC_IS_STR(x)   (PIC_IS(x, char *) || PIC_IS(x, const char *) || PIC_IS(x, unsigned char *) || PIC_IS(x, const unsigned char *))
 #define PIC_IS_FLT(x)   (PIC_IS(x, float) || PIC_IS(x, double) || PIC_IS(x, long double))
-#define PIC_IS_UNS(x)   (PIC_IS(x, unsigned int) || PIC_IS(x, unsigned long) || PIC_IS(x, unsigned long long) || \
+#define PIC_IS_UNS(x)   (PIC_IS(x, unsigned int) || PIC_IS(x, unsigned long) || \
                          __builtin_types_compatible_p(__typeof__(x), unsigned char) || \
                          __builtin_types_compatible_p(__typeof__(x), unsigned short))
 #define PIC_IS_CHAR(x)  __builtin_types_compatible_p(__typeof__(x), char)
-/* valores "seguros" para las ramas que no se usan (deben compilar igual) */
-#define PIC_STR(x)      __builtin_choose_expr(PIC_IS_STR(x), (x), "")
-#define PIC_NUM(x)      __builtin_choose_expr(PIC_IS_STR(x), 0, (x))
+#define PIC_KIND(x)     ((uint8_t)PIC_C(PIC_IS_STR(x) ? 1 : PIC_IS_CHAR(x) ? 2 : \
+                         (PIC_IS_UNS(x) ? 4 : 5) + (sizeof((x) + 0) > sizeof(int) ? 2 : 0)))
+#define PIC_PRINT_DEF   0xFFu      /* base 10, o 2 decimales */
 
-#define PIC_PRINT1(x) \
-  __builtin_choose_expr(PIC_IS_STR(x),  Serial_print_s((const char *)PIC_STR(x)), \
-  __builtin_choose_expr(PIC_IS_CHAR(x), Serial_write((uint8_t)PIC_NUM(x)), \
-  __builtin_choose_expr(PIC_IS_FLT(x),  Serial_print_f(PIC_NUM(x), 2), \
-  __builtin_choose_expr(PIC_IS_UNS(x),  Serial_print_u((unsigned long)PIC_NUM(x), 10), \
-                                        Serial_print_i((long)PIC_NUM(x), 10)))))
 #define PIC_PRINT2(x, b) \
-  __builtin_choose_expr(PIC_IS_FLT(x),  Serial_print_f(PIC_NUM(x), (uint8_t)(b)), \
-  __builtin_choose_expr(PIC_IS_UNS(x),  Serial_print_u((unsigned long)PIC_NUM(x), (uint8_t)(b)), \
-                                        Serial_print_i((long)PIC_NUM(x), (uint8_t)(b))))
+  (PIC_C(PIC_IS_FLT(x)) ? Serial_printkf((uint8_t)(b), (x)) : Serial_printk(PIC_KIND(x), (uint8_t)(b), (x)))
+#define PIC_PRINT1(x)   PIC_PRINT2(x, PIC_PRINT_DEF)
 #define PIC_PRINT_SEL(a, b, macro, ...)  macro
 
 #define Serial__begin(baud)     Serial_begin(baud)

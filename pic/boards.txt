@@ -1007,7 +1007,7 @@ pic24fj16ga002.build.mcu=24FJ16GA002
 pic24fj16ga002.build.tc=xc16
 pic24fj16ga002.build.xc={picbuild.xc16}
 pic24fj16ga002.build.cflags=-mcpu=24FJ16GA002 -omf=elf -O1 -std=gnu99 -msmart-io=1 -ffunction-sections
-pic24fj16ga002.build.ldflags=-Wl,--script=p24FJ16GA002.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections
+pic24fj16ga002.build.ldflags=-Wl,--script=p24FJ16GA002.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections,--undefined=_main
 pic24fj16ga002.upload.tool=picbuild
 pic24fj16ga002.upload.tool.default=picbuild
 pic24fj16ga002.upload.protocol=icsp
@@ -1051,7 +1051,7 @@ dspic33ep32gs502.build.mcu=33EP32GS502
 dspic33ep32gs502.build.tc=xc16
 dspic33ep32gs502.build.xc={picbuild.xc16}
 dspic33ep32gs502.build.cflags=-mcpu=33EP32GS502 -omf=elf -O1 -std=gnu99 -msmart-io=1 -ffunction-sections
-dspic33ep32gs502.build.ldflags=-Wl,--script=p33EP32GS502.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections
+dspic33ep32gs502.build.ldflags=-Wl,--script=p33EP32GS502.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections,--undefined=_main
 dspic33ep32gs502.upload.tool=picbuild
 dspic33ep32gs502.upload.tool.default=picbuild
 dspic33ep32gs502.upload.protocol=icsp
@@ -1095,7 +1095,7 @@ dspic33ep64mc206.build.mcu=33EP64MC206
 dspic33ep64mc206.build.tc=xc16
 dspic33ep64mc206.build.xc={picbuild.xc16}
 dspic33ep64mc206.build.cflags=-mcpu=33EP64MC206 -omf=elf -O1 -std=gnu99 -msmart-io=1 -ffunction-sections
-dspic33ep64mc206.build.ldflags=-Wl,--script=p33EP64MC206.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections
+dspic33ep64mc206.build.ldflags=-Wl,--script=p33EP64MC206.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections,--undefined=_main
 dspic33ep64mc206.upload.tool=picbuild
 dspic33ep64mc206.upload.tool.default=picbuild
 dspic33ep64mc206.upload.protocol=icsp
@@ -1139,7 +1139,7 @@ dspic33ck64mc105.build.mcu=33CK64MC105
 dspic33ck64mc105.build.tc=xc16
 dspic33ck64mc105.build.xc={picbuild.xc16}
 dspic33ck64mc105.build.cflags=-mcpu=33CK64MC105 -omf=elf -O1 -std=gnu99 -msmart-io=1 -ffunction-sections
-dspic33ck64mc105.build.ldflags=-Wl,--script=p33CK64MC105.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections
+dspic33ck64mc105.build.ldflags=-Wl,--script=p33CK64MC105.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections,--undefined=_main
 dspic33ck64mc105.upload.tool=picbuild
 dspic33ck64mc105.upload.tool.default=picbuild
 dspic33ck64mc105.upload.protocol=icsp

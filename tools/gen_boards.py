@@ -51,7 +51,7 @@ XC8 = dict(tc="xc8", xc="{picbuild.xc8}", cflags="-O2 -std=c99", ldflags="")
 def xc16(mcu):
     return dict(tc="xc16", xc="{picbuild.xc16}",
                 cflags="-mcpu=%s -omf=elf -O1 -std=gnu99 -msmart-io=1 -ffunction-sections" % mcu,
-                ldflags="-Wl,--script=p%s.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections" % mcu)
+                ldflags="-Wl,--script=p%s.gld,--stack=16,--data-init,--pack-data,--handles,--isr,--gc-sections,--undefined=_main" % mcu)
 def xc32(mcu):
     return dict(tc="xc32", xc="{picbuild.xc32}",
                 cflags="-mprocessor=%s -O1 -std=gnu99 -ffunction-sections -fdata-sections" % mcu,

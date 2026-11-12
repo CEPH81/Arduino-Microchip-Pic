@@ -29,7 +29,7 @@
     #else
       #define PIC_K_PIC18   1
     #endif
-  #elif defined(_PIC14E)
+  #elif defined(_PIC14E) || defined(_PIC14EX)
     #if defined(T0CON0)
       #define PIC_K_ENHNEW  1
     #else

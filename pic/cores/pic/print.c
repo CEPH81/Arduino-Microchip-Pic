@@ -2,6 +2,7 @@
  * print.c - Texto y números por Serial, sin printf (ocupa mucho menos).
  */
 #include "Arduino.h"
+#include <stdarg.h>
 
 #if defined(PIC_HAS_SERIAL)
 
@@ -60,6 +61,32 @@ void Serial_print_f(double v, uint8_t digits)
       v -= d;
     }
   }
+}
+
+/* Serial.print(x [, base]) para todo menos float: 'kind' dice qué tipo llegó */
+void Serial_printk(uint8_t kind, uint8_t base, ...)
+{
+  va_list ap;
+  if (base == PIC_PRINT_DEF) base = 10;
+  va_start(ap, base);
+  switch (kind) {
+    case 1:  Serial_print_s(va_arg(ap, const char *)); break;
+    case 2:  Serial_write((uint8_t)va_arg(ap, int)); break;
+    case 4:  Serial_print_u(va_arg(ap, unsigned int), base); break;
+    case 5:  Serial_print_i(va_arg(ap, int), base); break;
+    case 6:  Serial_print_u(va_arg(ap, unsigned long), base); break;
+    default: Serial_print_i(va_arg(ap, long), base); break;
+  }
+  va_end(ap);
+}
+
+/* Serial.print(float [, decimales]) */
+void Serial_printkf(uint8_t digits, ...)
+{
+  va_list ap;
+  va_start(ap, digits);
+  Serial_print_f(va_arg(ap, double), digits == PIC_PRINT_DEF ? 2u : digits);
+  va_end(ap);
 }
 
 #endif
