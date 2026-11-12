@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-model type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron" href="http://packs.download.microchip.com/schema/index.rng"?>
+<?xml-model type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0" href="http://packs.download.microchip.com/schema/index.rng"?>
+<idx xmlns:atmel="http://packs.download.atmel.com/pack-idx-atmel-extension">
+  <pdsc url="packs.download.microchip.com" name="Microchip.ATautomotive_DFP.pdsc" version="3.1.73" atmel:name="ATautomotive_DFP" atmel:name.gz="Microchip.ATautomotive_DFP.pdsc.gz">
+    <atmel:releases>
+      <atmel:release version="3.1.73" date="2022-09-26">
+        <atmel:description>- Updated field masks for lockbits for MPLAB and XC8.</atmel:description>
+        <atmel:keywords>
+          <atmel:keyword>Microchip</atmel:keyword>
+          <atmel:keyword>Device Family Package Microchip</atmel:keyword>
+          <atmel:keyword>Device Support</atmel:keyword>
+          <atmel:keyword>ATautomotive</atmel:keyword>
+        </atmel:keywords>
+        <atmel:devices>
+          <atmel:device name="ATA5505" family="ATautomotive" core="AVR8" endian="Little-endian">
+            <atmel:book name="https://www.microchip.com/wwwproducts/Devices.aspx?product=ATA5505" title="Device page for ATA5505"/>
+            <atmel:book name="https://www.microchip.com/wwwproducts/productds/ATA5505" title="Datasheet"/>
+            <atmel:prerequisite component="MPLAB X IDE" version="[5.35-"/>
+            <atmel:prerequisite component="MPLAB X IPE" version="[5.10-"/>
+            <atmel:prerequisite component="MPLAB XC8" version="[2.20-"/>
+            <atmel:toolchain component="GCC"/>
+            <atmel:toolchain component="AVRASM"/>
+            <atmel:toolchain component="MPLAB XC8"/>
+          </atmel:device>
+          <atmel:device name="ATA5700M322" family="ATautomotive" core="AVR8" endian="Little-endian">
+            <atmel:book name="https://www.microchip.com/wwwproducts/Devices.aspx?product=ATA5700M322" title="Device page for ATA5700M322"/>
+            <atmel:book name="https://www.microchip.com/wwwproducts/productds/ATA5700M322" title="Datasheet"/>
+            <atmel:prerequisite component="MPLAB X IDE" version="[5.35-"/>
+            <atmel:prerequisite component="MPLAB X IPE" version="[5.10-"/>
+            <atmel:prerequisite component="MPLAB XC8" version="[2.20-"/>
+            <atmel:toolchain component="GCC"/>
+            <atmel:toolchain component="AVRASM"/>
+            <atmel:toolchain component="MPLAB XC8"/>
+          </atmel:device>
+          <atmel:device name="ATA5702M322" family="ATautomotive" core="AVR8" endian="Little-endian">
+            <atmel:book name="https://www.microchip.com/wwwproducts/Devices.aspx?product=ATA5702M322" title="Device page for ATA5702M322"/>
+            <atmel:book name="https://www.microchip.com/wwwproducts/productds/ATA5702M322" title="Datasheet"/>
+            <atmel:prerequisite component="MPLAB X IDE" version="[5.35-"/>
+     

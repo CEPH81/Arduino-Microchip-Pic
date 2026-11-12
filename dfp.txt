@@ -1,0 +1,5 @@
+<pdsc url="packs.download.microchip.com" name="Microchip.PIC12-16F1xxx_DFP.pdsc" version="1.10.270" atmel:name="PIC12-16F1xxx_DFP" atmel:name.gz="Microchip.PIC12-16F1xxx_DFP.pdsc.gz">
+<pdsc url="packs.download.microchip.com" name="Microchip.PIC16F1xxxx_DFP.pdsc" version="1.32.471" atmel:name="PIC16F1xxxx_DFP" atmel:name.gz="Microchip.PIC16F1xxxx_DFP.pdsc.gz">
+<pdsc url="packs.download.microchip.com" name="Microchip.PIC16Fxxx_DFP.pdsc" version="1.9.176" atmel:name="PIC16Fxxx_DFP" atmel:name.gz="Microchip.PIC16Fxxx_DFP.pdsc.gz">
+<pdsc url="packs.download.microchip.com" name="Microchip.PIC18F-Q_DFP.pdsc" version="1.31.492" atmel:name="PIC18F-Q_DFP" atmel:name.gz="Microchip.PIC18F-Q_DFP.pdsc.gz">
+<pdsc url="packs.download.microchip.com" name="Microchip.PIC18Fxxxx_DFP.pdsc" version="1.8.178" atmel:name="PIC18Fxxxx_DFP" atmel:name.gz="Microchip.PIC18Fxxxx_DFP.pdsc.gz">
