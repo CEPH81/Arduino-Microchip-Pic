@@ -1,13 +1,21 @@
 #!/bin/bash
-# Sonda de desarrollo: copia a la rama "sonda" los textos de licencia que
-# traen los compiladores instalados (para saber si se pueden redistribuir).
+# Sonda de desarrollo: comprueba los enlaces de descarga de Microchip
+# (instaladores de XC8/XC16/XC32 y MPLAB X para Windows, Linux y macOS).
 O=$PWD/salida; mkdir -p $O
-for d in /opt/microchip/xc8/* /opt/microchip/xc16/* /opt/microchip/xc32/*; do
-  n=$(echo $d | sed 's|/opt/microchip/||; s|/|_|g'); mkdir -p $O/$n
-  find $d -maxdepth 3 \( -iname '*licen*' -o -iname '*eula*' -o -iname 'copying*' -o -iname '*notice*' -o -iname '*agreement*' \) -type f -size -2000k 2>/dev/null | head -40 > $O/$n/lista.txt
-  i=0; while read f; do i=$((i+1)); cp "$f" "$O/$n/$(printf %02d $i)_$(basename "$f")" 2>/dev/null; done < $O/$n/lista.txt
-  ls $d $d/docs 2>/dev/null | head -80 > $O/$n/ls.txt
-  du -sh $d > $O/$n/du.txt 2>/dev/null
-done
-for f in $(find $O -iname '*.pdf'); do pdftotext "$f" "$f.txt" 2>/dev/null; done
-du -sh $O/*
+B=https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools
+for f in \
+  xc8-v2.50-full-install-windows-x64-installer.exe xc8-v2.50-full-install-linux-x64-installer.run xc8-v2.50-full-install-macos-x64-installer.dmg xc8-v2.50-full-install-osx-x64-installer.dmg \
+  xc8-v3.10-full-install-windows-x64-installer.exe xc8-v3.10-full-install-linux-x64-installer.run xc8-v3.10-full-install-macos-x64-installer.dmg xc8-v3.10-full-install-macos-installer.dmg \
+  xc16-v2.10-full-install-windows64-installer.exe xc16-v2.10-full-install-linux64-installer.run xc16-v2.10-full-install-osx64-installer.dmg \
+  xc32-v5.00-full-install-windows-x64-installer.exe xc32-v5.00-full-install-linux-x64-installer.run xc32-v5.00-full-install-macos-x64-installer.dmg xc32-v5.00-full-install-osx-x64-installer.dmg \
+  xc32-v4.45-full-install-windows-x64-installer.exe xc32-v4.45-full-install-linux-x64-installer.run xc32-v4.45-full-install-osx-x64-installer.dmg \
+  MPLABX-v6.20-windows-installer.exe MPLABX-v6.20-linux-installer.tar MPLABX-v6.20-osx-installer.dmg \
+  MPLABX-v6.15-windows-installer.exe MPLABX-v6.25-windows-installer.exe MPLABX-v6.25-linux-installer.tar ; do
+  r=$(curl -sIL -m 40 "$B/$f" | tr -d '\r' | awk 'BEGIN{c="?";l="?"} /^HTTP/{c=$2} tolower($1)=="content-length:"{l=$2} END{print c, l}')
+  echo "$f $r"
+done > $O/enlaces.txt
+cat $O/enlaces.txt
+# DFP: índice de packs y licencia
+curl -sL -m 60 https://packs.download.microchip.com/index.idx -o /tmp/idx.xml; ls -la /tmp/idx.xml
+grep -o '<pdsc [^>]*name="Microchip\.\(PIC16Fxxx\|PIC16F1xxxx\|PIC18Fxxxx\|PIC18F-Q\|PIC12-16F1xxx\)_DFP[^>]*>' /tmp/idx.xml | head -20 > $O/dfp.txt
+head -c 3000 /tmp/idx.xml > $O/idx_inicio.txt
