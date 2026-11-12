@@ -1,0 +1,101 @@
+{
+  "packages": [
+    {
+      "name": "CEPH81",
+      "maintainer": "CEPH81 (MikrocontrollerCephs)",
+      "websiteURL": "https://github.com/CEPH81/Arduino-Microchip-Pic",
+      "email": "",
+      "help": {
+        "online": "https://github.com/CEPH81/Arduino-Microchip-Pic/issues"
+      },
+      "platforms": [
+        {
+          "name": "Microchip PIC (CEPH81)",
+          "architecture": "pic",
+          "version": "0.1.0",
+          "category": "Contributed",
+          "help": {
+            "online": "https://github.com/CEPH81/Arduino-Microchip-Pic"
+          },
+          "url": "https://github.com/CEPH81/Arduino-Microchip-Pic/releases/download/v0.1.0/pic-0.1.0.zip",
+          "archiveFileName": "pic-0.1.0.zip",
+          "checksum": "SHA-256:111d31099ca874276545235937fd63285da6058466c071d4a399c4983d80a8eb",
+          "size": "2880211",
+          "boards": [
+            {
+              "name": "PIC16F84"
+            },
+            {
+              "name": "PIC16F84A"
+            },
+            {
+              "name": "PIC16F88"
+            },
+            {
+              "name": "PIC16F690"
+            },
+            {
+              "name": "PIC16F870"
+            },
+            {
+              "name": "PIC16F872"
+            },
+            {
+              "name": "PIC16F874"
+            },
+            {
+              "name": "PIC16F874A"
+            },
+            {
+              "name": "PIC16F877"
+            },
+            {
+              "name": "PIC16F877A"
+            },
+            {
+              "name": "PIC16F1947"
+            },
+            {
+              "name": "PIC16F15385"
+            },
+            {
+              "name": "PIC16F18877"
+            },
+            {
+              "name": "PIC18F2420"
+            },
+            {
+              "name": "PIC18F2520"
+            },
+            {
+              "name": "PIC18F2455"
+            },
+            {
+              "name": "PIC18F2550"
+            },
+            {
+              "name": "PIC18F57Q84 (Curiosity Nano)"
+            },
+            {
+              "name": "PIC24FJ16GA002"
+            },
+            {
+              "name": "dsPIC33EP32GS502"
+            },
+            {
+              "name": "dsPIC33EP64MC206"
+            },
+            {
+              "name": "dsPIC33CK64MC105 (Curiosity Nano)"
+            },
+            {
+              "name": "PIC32MM0256GPM064 (PIC32MM USB Curiosity)"
+            }
+          ],
+          "toolsDependencies": []
+        }
+      ],
+      "tools": []
+    }
+  ]
+}
