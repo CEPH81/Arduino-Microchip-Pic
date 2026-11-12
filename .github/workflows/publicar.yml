@@ -1,0 +1,64 @@
+# Publica la versión de pic/platform.txt si todavía no existe su Release.
+# Se dispara con cada push a main (o a mano desde la pestaña Actions):
+# empaqueta el núcleo, crea la etiqueta vX.Y.Z y la Release con el zip, y
+# actualiza package_ceph81_pic_index.json con el checksum real.
+# Para sacar una versión nueva basta con subir 'version=' en platform.txt.
+name: Publicar versión
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ¿Ya está publicada esta versión?
+        id: ver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER=$(grep '^version=' pic/platform.txt | cut -d= -f2 | tr -d '\r')
+          echo "ver=$VER" >> $GITHUB_OUTPUT
+          if gh release view "v$VER" >/dev/null 2>&1; then
+            echo "nueva=no" >> $GITHUB_OUTPUT
+            echo "v$VER ya existe, no se publica nada"
+          else
+            echo "nueva=si" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/setup-go@v5
+        if: steps.ver.outputs.nueva == 'si'
+        with:
+          go-version: '1.22'
+          cache: false
+
+      - name: Empaquetar (compila picbuild para Windows, Linux y macOS)
+        if: steps.ver.outputs.nueva == 'si'
+        run: python3 tools/make_release.py "${{ steps.ver.outputs.ver }}"
+
+      - name: Crear etiqueta y Release
+        if: steps.ver.outputs.nueva == 'si'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.ver }}
+          target_commitish: ${{ github.sha }}
+          name: Microchip PIC (CEPH81) ${{ steps.ver.outputs.ver }}
+          files: dist/pic-${{ steps.ver.outputs.ver }}.zip
+
+      - name: Actualizar el índice en main
+        if: steps.ver.outputs.nueva == 'si'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package_ceph81_pic_index.json
+          git commit -m "Índice del Gestor de placas: versión ${{ steps.ver.outputs.ver }}" || echo "sin cambios"
+          git push origin HEAD:main
