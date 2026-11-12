@@ -1,0 +1,77 @@
+# Arduino-Microchip-Pic (CEPH81)
+# Núcleo Arduino para Microchip PIC de 8, 16 y 32 bits con los compiladores
+# MPLAB XC8, XC16 / XC-DSC y XC32 (se instalan aparte, desde microchip.com).
+# https://arduino.github.io/arduino-cli/latest/platform-specification/
+
+name=Microchip PIC (CEPH81)
+version=0.1.0
+
+# ---------------------------------------------------------------------------
+# picbuild: puente entre el IDE y los compiladores XC (código en tools/picbuild).
+# Busca los compiladores en su carpeta normal de instalación. Para indicar
+# otra, cree platform.local.txt junto a este archivo con, por ejemplo:
+#   picbuild.xc8=C:/Program Files/Microchip/xc8/v2.50
+#   picbuild.xc16=C:/Program Files/Microchip/xc16/v2.10
+#   picbuild.xc32=C:/Program Files/Microchip/xc32/v4.35
+#   picbuild.ipe=C:/Program Files/Microchip/MPLABX/v6.20/mplab_platform/mplab_ipe/ipecmd.exe
+# ---------------------------------------------------------------------------
+picbuild.path={runtime.platform.path}/tools
+picbuild.cmd=picbuild
+picbuild.cmd.windows=picbuild.exe
+picbuild.xc8=
+picbuild.xc16=
+picbuild.xc32=
+picbuild.ipe=
+picbuild.dfp={runtime.platform.path}/dfp/{build.dfp}
+
+compiler.warning_flags=-w
+compiler.warning_flags.none=-w
+compiler.warning_flags.default=
+compiler.warning_flags.more=-Wall
+compiler.warning_flags.all=-Wall
+
+compiler.defines=-DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_ARCH_PIC {build.clock_flags} {build.extra_flags}
+compiler.flags={build.cflags} {compiler.warning_flags} {compiler.defines} {compiler.extra_flags}
+compiler.extra_flags=
+build.extra_flags=
+build.clock_flags=
+build.dfp=ninguno
+
+# ---------------------------------------------------------------------------
+# Recetas (todas pasan por picbuild)
+# ---------------------------------------------------------------------------
+recipe.preproc.macros={picbuild.base.pre} "{source_file}" "{preprocessed_file_path}" {compiler.flags} {includes}
+recipe.c.o.pattern={picbuild.base.cc} "{source_file}" "{object_file}" {compiler.flags} {includes}
+recipe.cpp.o.pattern={picbuild.base.cc} "{source_file}" "{object_file}" {compiler.flags} {includes}
+recipe.S.o.pattern={picbuild.base.cc} "{source_file}" "{object_file}" {compiler.flags} {includes}
+recipe.ar.pattern={picbuild.base.ar} "{archive_file_path}" "{object_file}"
+recipe.c.combine.pattern={picbuild.base.link} "{build.path}/{build.project_name}" {build.cflags} {build.ldflags} -- {object_files} "{archive_file_path}"
+recipe.size.pattern={picbuild.base.size} "{build.path}/{build.project_name}"
+recipe.size.regex=^FLASH\s+([0-9]+)
+recipe.size.regex.data=^RAM\s+([0-9]+)
+
+recipe.output.tmp_file={build.project_name}.hex
+recipe.output.save_file={build.project_name}.{build.mcu}.hex
+
+picbuild.base.pre="{picbuild.path}/{picbuild.cmd}" pre -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
+picbuild.base.cc="{picbuild.path}/{picbuild.cmd}" cc -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
+picbuild.base.ar="{picbuild.path}/{picbuild.cmd}" ar -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
+picbuild.base.link="{picbuild.path}/{picbuild.cmd}" link -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
+picbuild.base.size="{picbuild.path}/{picbuild.cmd}" size -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
+
+# ---------------------------------------------------------------------------
+# Carga: ipecmd de MPLAB IPE (PICkit 3/4/5, ICD, SNAP, PKOB) o copia a la
+# unidad CURIOSITY (menú Herramientas > Programador)
+# ---------------------------------------------------------------------------
+tools.picbuild.path={runtime.platform.path}/tools
+tools.picbuild.cmd=picbuild
+tools.picbuild.cmd.windows=picbuild.exe
+tools.picbuild.ipe={picbuild.ipe}
+tools.picbuild.upload.params.verbose=-v
+tools.picbuild.upload.params.quiet=
+tools.picbuild.upload.pattern="{path}/{cmd}" upload -tc {build.tc} -mcu {build.mcu} "-ipe={ipe}" -tool {upload.tool_code} "-power={upload.power}" {upload.verbose} "{build.path}/{build.project_name}.hex"
+tools.picbuild.program.params.verbose=-v
+tools.picbuild.program.params.quiet=
+tools.picbuild.program.pattern="{path}/{cmd}" upload -tc {build.tc} -mcu {build.mcu} "-ipe={ipe}" -tool {upload.tool_code} "-power={upload.power}" {program.verbose} "{build.path}/{build.project_name}.hex"
+tools.picbuild.erase.pattern=
+tools.picbuild.bootloader.pattern=

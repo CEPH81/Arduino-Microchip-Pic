@@ -1,0 +1,28 @@
+# Compila todos los ejemplos en todas las placas con los compiladores XC
+# instalados en el runner (descarga directa de Microchip, en caché).
+name: Compilar
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['pic/**', 'tools/**', '.github/workflows/compilar.yml']
+  pull_request:
+jobs:
+  compilar:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Caché de compiladores
+        uses: actions/cache@v4
+        with:
+          path: /opt/microchip
+          key: xc-8v2.50-8v3.10-16v2.10-32v5.00
+      - name: Instalar XC8, XC16 y XC32
+        run: bash tools/instalar_xc.sh
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: false
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Compilar ejemplos
+        run: bash tools/ci_compilar.sh
