@@ -1,0 +1,34 @@
+# Sonda de desarrollo: instala los compiladores XC en el runner (descarga
+# directa de Microchip) y copia a la rama "sonda" los headers de los chips
+# soportados, para escribir el núcleo contra los nombres reales de registros.
+name: Sonda
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tools/sonda.sh', '.github/workflows/sonda.yml']
+permissions:
+  contents: write
+jobs:
+  sonda:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Caché de compiladores
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: /opt/microchip
+          key: xc-8v3.10-16v2.10-32v5.00
+      - name: Instalar XC8, XC16 y XC32
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: bash tools/instalar_xc.sh
+      - name: Sonda
+        run: bash tools/sonda.sh
+      - name: Publicar en la rama sonda
+        run: |
+          cd salida
+          git init -q -b sonda
+          git config user.name "sonda"; git config user.email "sonda@users.noreply.github.com"
+          git add -A && git commit -q -m "sonda"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" sonda
