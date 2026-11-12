@@ -1,29 +1,58 @@
 #!/bin/bash
-# Copia a ./salida los headers y datos de configuración de los chips soportados.
-O=$PWD/salida; mkdir -p $O
-X8=/opt/microchip/xc8/v2.50; X16=$(ls -d /opt/microchip/xc16/v* | tail -1); X32=$(ls -d /opt/microchip/xc32/v* | tail -1)
-{
-  for d in $X8 $X16 $X32; do echo "== $d"; ls $d; ls $d/bin | head -60; done
-  $X8/bin/xc8-cc --version 2>&1 | head -3; $X16/bin/xc16-gcc --version 2>&1 | head -2; $X32/bin/xc32-gcc --version 2>&1 | head -2
-  echo "== xc8 pic"; ls $X8; ls $X8/pic; ls $X8/pic/include | head -40; ls $X8/pic/dat; ls $X8/dfp 2>/dev/null | head; find $X8 -iname 'pic16f877a.h' -o -iname '16f877a.cfgdata' -o -iname '16f877a.ini' | head
-  echo "== xc16 support"; ls $X16/support; ls $X16/docs | head -30
-  echo "== xc32"; ls $X32/pic32mx; ls $X32/pic32mx/include | head -30; ls $X32/docs | head -30
-  ls $X32/pic32m/include | head -50; ls $X32/pic32m/lib | head -40
-} > $O/info.txt 2>&1
-mkdir -p $O/xc8 $O/xc16 $O/xc32
-for c in 16f84 16f84a 16f88 16f690 16f870 16f872 16f874 16f874a 16f877 16f877a 16f1947 16f15385 16f18877 18f2520 18f2525 18f2550 18f2420 18f2455 18f57q84; do
-  find $X8 -iname "pic$c.h" -exec cp {} $O/xc8/ \;
-  find $X8 -iname "$c.cfgdata" -exec cp {} $O/xc8/ \;
-done
-cp $X8/pic/include/xc.h $X8/pic/include/pic.h $X8/pic/include/pic18.h $X8/pic/include/htc.h $O/xc8/ 2>/dev/null
-find $X8/pic/include -maxdepth 1 -name '*.h' | sed 's|.*/||' | tr '\n' ' ' > $O/xc8/lista_include.txt
-$X8/bin/xc8-cc --help > $O/xc8/ayuda.txt 2>&1
-for c in 24FJ16GA002 33EP32GS502 33EP64MC206 33CK64MC105; do
-  find $X16/support -name "p$c.h" -exec cp {} $O/xc16/ \;
-  find $X16/support -name "p$c.gld" -exec cp {} $O/xc16/ \;
-  find $X16/docs -iname "*$c*" -exec cp {} $O/xc16/ \;
-done
-find $X16/support -maxdepth 2 | head -60 > $O/xc16/arbol.txt
-for f in $(find $X32 -iname '*32mm0256gpm064*' -type f | grep -v '\.a$\|\.o$' | head -30); do cp $f $O/xc32/ 2>/dev/null; done
-find $X32 -ipath '*32mm0256gpm064*' | head -60 > $O/xc32/arbol.txt
-du -sh $O/*
+# Sonda de desarrollo: prueba qué construcciones de C acepta XC8 y cuánto ocupan.
+O=$PWD/salida; mkdir -p $O; cd $O
+X8=/opt/microchip/xc8/v2.50/bin/xc8-cc
+cat > base.h <<'XX'
+#include <xc.h>
+#include <stdint.h>
+#pragma config FOSC = INTOSCIO, WDTE = OFF, LVP = OFF
+void wr(uint8_t c) { while (!PIR1bits.TXIF) { } TXREG = c; }
+void p_s(const char *s) { while (*s) wr((uint8_t)*s++); }
+void p_c(char c) { wr((uint8_t)c); }
+void p_u(unsigned long v, uint8_t base) { char b[33]; uint8_t i = 33; do { uint8_t d = (uint8_t)(v % base); v /= base; b[--i] = (char)(d < 10 ? '0' + d : 'A' + d - 10); } while (v); while (i < 33) wr((uint8_t)b[i++]); }
+void p_i(long v, uint8_t base) { if (base == 10 && v < 0) { wr('-'); v = -v; } p_u((unsigned long)v, base); }
+void p_f(double v, uint8_t dig) { unsigned long e = (unsigned long)v; p_u(e, 10); wr('.'); v -= (double)e; while (dig--) { v *= 10.0; uint8_t d = (uint8_t)v; wr((uint8_t)('0' + d)); v -= d; } }
+void p_u10(unsigned long v) { p_u(v, 10); }
+void p_i10(long v) { p_i(v, 10); }
+void p_f2(double v) { p_f(v, 2); }
+XX
+prueba() {  # nombre, cuerpo de main
+  { echo '#include "base.h"'; cat; } > $1.c
+  if $X8 -mcpu=16F88 -O2 -std=c99 -o $1.elf $1.c > $1.log 2>&1; then
+    echo "OK    $1: $(grep -o 'Program space *used *[0-9A-Fa-f]*h *( *[0-9]*)' $1.log | grep -o '( *[0-9]*)')"
+  else
+    echo "FALLA $1: $(grep -m2 -i 'error\|what()' $1.log | tr '\n' ' ' | cut -c1-200)"
+  fi
+}
+prueba directo <<'XX'
+unsigned int n; void main(void) { p_s("hola "); p_u10(n); for (;;) { } }
+XX
+prueba directo_float <<'XX'
+unsigned int n; float f; void main(void) { p_s("hola "); p_u10(n); p_f2(f); for (;;) { } }
+XX
+prueba generic <<'XX'
+#define P(x) _Generic((x), char *: p_s, const char *: p_s, char: p_c, float: p_f2, double: p_f2, unsigned char: p_u10, unsigned int: p_u10, unsigned long: p_u10, default: p_i10)(x)
+unsigned int n; void main(void) { P("hola "); P(n); for (;;) { } }
+XX
+prueba generic_decay <<'XX'
+#define P(x) _Generic((x), char: p_c, default: _Generic(((x) + 0), char *: p_s, const char *: p_s, float: p_f2, double: p_f2, unsigned int: p_u10, unsigned long: p_u10, default: p_i10))(x)
+unsigned int n; char c; uint8_t b; void main(void) { P("hola "); P(n); P(c); P(b); P(-5); for (;;) { } }
+XX
+prueba generic_base <<'XX'
+#define P2(x, b) _Generic(((x) + 0), float: p_f, double: p_f, unsigned int: p_u, unsigned long: p_u, default: p_i)((x), (b))
+unsigned int n; void main(void) { P2(n, 16); P2(-7, 10); for (;;) { } }
+XX
+prueba ternario_const <<'XX'
+#define C(e) (sizeof(char[1 + (e)]) - 1u)
+#define ISF(x) (__builtin_types_compatible_p(__typeof__((x) + 0), float) || __builtin_types_compatible_p(__typeof__((x) + 0), double))
+#define P(x) (C(ISF(x)) ? p_f2(x) : p_u10(x))
+unsigned int n; void main(void) { p_s("hola "); P(n); for (;;) { } }
+XX
+prueba if_const <<'XX'
+unsigned int n; float f; void main(void) { p_s("hola "); if (sizeof(char[1]) - 1u) p_f2(f); else p_u10(n); for (;;) { } }
+XX
+prueba typeof_sizeof <<'XX'
+unsigned int n; void main(void) { p_u10(sizeof(__typeof__((n) + 0))); p_u10(__builtin_types_compatible_p(int, long)); for (;;) { } }
+XX
+cat *.log | grep -i 'error' | sort | uniq -c | head -20
+ls > lista.txt
