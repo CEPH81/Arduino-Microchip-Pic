@@ -18,18 +18,27 @@ Pendientes: PIC32CM-LS00 Curiosity (ARM Cortex-M23) y AVR32SD32 Curiosity Nano (
 
 ## Instalación
 
-1. **Compiladores** (se instalan aparte, desde microchip.com; su licencia no permite incluirlos en este paquete). Solo el de la familia que use:
-   - 8 bits: [MPLAB XC8](https://www.microchip.com/xc8). Recomendado **v2.50**, que ya trae los datos de todos los chips. Las v3.x necesitan además el paquete del chip (DFP) de MPLAB X.
-   - 16 bits: [MPLAB XC16](https://www.microchip.com/xc16) (v2.10) o XC-DSC.
-   - 32 bits: [MPLAB XC32](https://www.microchip.com/xc32).
-2. **MPLAB X IDE con MPLAB IPE** para grabar (trae `ipecmd`). Para el **PICkit 3 use MPLAB X v6.20 o anterior**: las versiones nuevas ya no lo incluyen.
-3. **Arduino IDE** › Archivo › Preferencias › *URLs adicionales del Gestor de placas*:
+1. **Arduino IDE** › Archivo › Preferencias › *URLs adicionales del Gestor de placas*:
 
    ```
    https://raw.githubusercontent.com/CEPH81/Arduino-Microchip-Pic/main/package_ceph81_pic_index.json
    ```
 
    Después, Herramientas › Placa › Gestor de placas › buscar **Microchip PIC (CEPH81)** › Instalar (unos 3 MB).
+
+2. **Compilador**: la primera vez que compile para una familia, si falta su compilador el núcleo **descarga el instalador oficial desde microchip.com** a su carpeta de Descargas y lo abre. Instálelo con las opciones por defecto (tipo de licencia *Free*) y vuelva a pulsar Verificar.
+
+   | Familia | Compilador que se descarga | Descarga | Instalado |
+   |---|---|---|---|
+   | 8 bits | MPLAB XC8 v2.50 | 85 MB | 2,2 GB |
+   | 16 bits | MPLAB XC16 v2.10 | 125 MB | 1,9 GB |
+   | 32 bits | MPLAB XC32 v5.00 | 1,1 GB | 7 GB |
+
+   Si ya tiene instalado XC8 (v2.50, o una v3.x con el paquete del chip de MPLAB X), XC16 / XC-DSC o XC32, se usa ese y no se descarga nada.
+
+3. **MPLAB X IDE con MPLAB IPE** para grabar con el PICkit (trae `ipecmd`). Para el **PICkit 3 use MPLAB X v6.20 o anterior**: las versiones nuevas ya no lo incluyen. Si falta, al pulsar Subir se abre la [página de versiones anteriores de Microchip](https://www.microchip.com/en-us/tools-resources/archives/mplab-ecosystem). Las placas Curiosity Nano no lo necesitan.
+
+**¿Por qué no vienen los compiladores dentro del paquete?** Desde julio de 2026 son gratis con todas las optimizaciones, pero su licencia solo permite *instalarlos y usarlos*; prohíbe distribuirlos a terceros. Por eso el núcleo los baja del sitio de Microchip en el equipo de cada usuario, que es quien acepta la licencia. Para desactivar la descarga automática: `picbuild.autoinstalar=no` en `platform.local.txt`.
 
 El núcleo busca los compiladores e IPE en su carpeta normal (`C:\Program Files\Microchip`, `/opt/microchip`, `/Applications/microchip`). Si están en otro sitio, cree `platform.local.txt` junto a `platform.txt` del paquete:
 

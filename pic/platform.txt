@@ -4,7 +4,7 @@
 # https://arduino.github.io/arduino-cli/latest/platform-specification/
 
 name=Microchip PIC (CEPH81)
-version=0.1.0
+version=0.1.1
 
 # ---------------------------------------------------------------------------
 # picbuild: puente entre el IDE y los compiladores XC (código en tools/picbuild).
@@ -23,6 +23,11 @@ picbuild.xc8=
 picbuild.xc16=
 picbuild.xc32=
 picbuild.ipe=
+# Si falta el compilador del chip elegido, picbuild descarga el instalador
+# oficial de microchip.com a la carpeta de Descargas y lo abre (la licencia
+# de Microchip no permite incluir los compiladores en este paquete).
+# Para desactivarlo: picbuild.autoinstalar=no en platform.local.txt
+picbuild.autoinstalar=si
 picbuild.dfp={runtime.platform.path}/dfp/{build.dfp}
 
 compiler.warning_flags=-w
@@ -54,11 +59,11 @@ recipe.size.regex.data=^RAM\s+([0-9]+)
 recipe.output.tmp_file={build.project_name}.hex
 recipe.output.save_file={build.project_name}.{build.mcu}.hex
 
-picbuild.base.pre="{picbuild.path}/{picbuild.cmd}" pre -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
-picbuild.base.cc="{picbuild.path}/{picbuild.cmd}" cc -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
-picbuild.base.ar="{picbuild.path}/{picbuild.cmd}" ar -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
-picbuild.base.link="{picbuild.path}/{picbuild.cmd}" link -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
-picbuild.base.size="{picbuild.path}/{picbuild.cmd}" size -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}"
+picbuild.base.pre="{picbuild.path}/{picbuild.cmd}" pre -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}" "-auto={picbuild.autoinstalar}"
+picbuild.base.cc="{picbuild.path}/{picbuild.cmd}" cc -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}" "-auto={picbuild.autoinstalar}"
+picbuild.base.ar="{picbuild.path}/{picbuild.cmd}" ar -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}" "-auto={picbuild.autoinstalar}"
+picbuild.base.link="{picbuild.path}/{picbuild.cmd}" link -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}" "-auto={picbuild.autoinstalar}"
+picbuild.base.size="{picbuild.path}/{picbuild.cmd}" size -tc {build.tc} -mcu {build.mcu} "-xc={build.xc}" "-dfp={picbuild.dfp}" "-auto={picbuild.autoinstalar}"
 
 # ---------------------------------------------------------------------------
 # Carga: ipecmd de MPLAB IPE (PICkit 3/4/5, ICD, SNAP, PKOB) o copia a la
@@ -71,9 +76,9 @@ tools.picbuild.cmd.macosx=picbuild_mac
 tools.picbuild.ipe={picbuild.ipe}
 tools.picbuild.upload.params.verbose=-v
 tools.picbuild.upload.params.quiet=
-tools.picbuild.upload.pattern="{path}/{cmd}" upload -tc {build.tc} -mcu {build.mcu} "-ipe={ipe}" -tool {upload.tool_code} "-power={upload.power}" {upload.verbose} "{build.path}/{build.project_name}.hex"
+tools.picbuild.upload.pattern="{path}/{cmd}" upload -tc {build.tc} -mcu {build.mcu} "-ipe={ipe}" "-auto={picbuild.autoinstalar}" -tool {upload.tool_code} "-power={upload.power}" {upload.verbose} "{build.path}/{build.project_name}.hex"
 tools.picbuild.program.params.verbose=-v
 tools.picbuild.program.params.quiet=
-tools.picbuild.program.pattern="{path}/{cmd}" upload -tc {build.tc} -mcu {build.mcu} "-ipe={ipe}" -tool {upload.tool_code} "-power={upload.power}" {program.verbose} "{build.path}/{build.project_name}.hex"
+tools.picbuild.program.pattern="{path}/{cmd}" upload -tc {build.tc} -mcu {build.mcu} "-ipe={ipe}" "-auto={picbuild.autoinstalar}" -tool {upload.tool_code} "-power={upload.power}" {program.verbose} "{build.path}/{build.project_name}.hex"
 tools.picbuild.erase.pattern=
 tools.picbuild.bootloader.pattern=

@@ -130,7 +130,7 @@ func cmdUpload(o *opciones) {
 	}
 	ipe := ipecmd(o)
 	if ipe == "" {
-		fallo("no encuentro ipecmd (MPLAB IPE).\n  Instale MPLAB X IDE con MPLAB IPE (para el PICkit 3: v6.20 o anterior) o indique la ruta en\n  platform.local.txt:  picbuild.ipe=C:/Program Files/Microchip/MPLABX/v6.20/mplab_platform/mplab_ipe/ipecmd.exe")
+		instalarIPE(o)
 	}
 	// ipecmd deja sus registros (MPLABXLog.xml...) en la carpeta de trabajo
 	tmp, err := os.MkdirTemp("", "picbuild-ipe")

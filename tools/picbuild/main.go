@@ -44,6 +44,7 @@ type opciones struct {
 	ipe   string // ruta de ipecmd (opcional)
 	tool  string // PK3, PK4, PK5, ICD3, ICD4, SNAP, CURIOSITY
 	power string // "", "3.3", "5.0"...
+	auto  string // "no": no descargar los compiladores que falten
 	verb  bool
 	resto []string
 }
@@ -189,10 +190,11 @@ func buscar(o *opciones) herramientas {
 			}
 		}
 		if h.raiz == "" {
+			manual := "Instálelo desde https://www.microchip.com/xc8 (es gratis; la v2.50 trae todos los chips) o indique su\n  carpeta en platform.local.txt:  picbuild.xc8=C:/Program Files/Microchip/xc8/v2.50"
 			if len(cand) == 0 {
-				fallo("no encuentro el compilador MPLAB XC8.\n  Instálelo desde https://www.microchip.com/xc8 (es gratis) o indique su carpeta en\n  platform.local.txt:  picbuild.xc8=C:/Program Files/Microchip/xc8/v2.50")
+				instalarCompilador(o, "xc8", "no encuentro el compilador MPLAB XC8.", manual)
 			}
-			fallo("el XC8 instalado (%s) no trae el PIC%s y no hay un paquete de dispositivo (DFP) en MPLAB X.\n  Instale XC8 v2.50 o abra MPLAB X > Tools > Packs e instale el DFP de este chip.", cand[0], o.mcu)
+			instalarCompilador(o, "xc8", fmt.Sprintf("el XC8 instalado (%s) no trae el PIC%s y no hay un paquete de dispositivo (DFP) en MPLAB X.", cand[0], o.mcu), manual)
 		}
 		h.cc, h.ar = bin(h.raiz, "xc8-cc"), bin(h.raiz, "xc8-ar")
 	case "xc16":
@@ -224,7 +226,8 @@ func buscar(o *opciones) herramientas {
 			}
 		}
 		if h.raiz == "" {
-			fallo("no encuentro el compilador MPLAB XC16 ni XC-DSC.\n  Instálelo desde https://www.microchip.com/xc16 (es gratis) o indique su carpeta en\n  platform.local.txt:  picbuild.xc16=C:/Program Files/Microchip/xc16/v2.10")
+			instalarCompilador(o, "xc16", "no encuentro el compilador MPLAB XC16 ni XC-DSC.",
+				"Instálelo desde https://www.microchip.com/xc16 (es gratis) o indique su carpeta en\n  platform.local.txt:  picbuild.xc16=C:/Program Files/Microchip/xc16/v2.10")
 		}
 	case "xc32":
 		cand := versiones("xc32")
@@ -240,7 +243,8 @@ func buscar(o *opciones) herramientas {
 			}
 		}
 		if h.raiz == "" {
-			fallo("no encuentro el compilador MPLAB XC32.\n  Instálelo desde https://www.microchip.com/xc32 (es gratis) o indique su carpeta en\n  platform.local.txt:  picbuild.xc32=C:/Program Files/Microchip/xc32/v4.45")
+			instalarCompilador(o, "xc32", "no encuentro el compilador MPLAB XC32.",
+				"Instálelo desde https://www.microchip.com/xc32 (es gratis) o indique su carpeta en\n  platform.local.txt:  picbuild.xc32=C:/Program Files/Microchip/xc32/v5.00")
 		}
 		h.cc, h.ar, h.hex, h.size = bin(h.raiz, "xc32-gcc"), bin(h.raiz, "xc32-ar"), bin(h.raiz, "xc32-bin2hex"), bin(h.raiz, "xc32-size")
 		// los XC32 anteriores a v4.x traen los chips; los nuevos necesitan un DFP
@@ -599,7 +603,7 @@ func main() {
 			return a[i-1]
 		}
 		// forma -clave=valor (el valor puede venir vacío)
-		if k, v, ok := strings.Cut(a[i], "="); ok && (k == "-xc" || k == "-dfp" || k == "-ipe" || k == "-power" || k == "-gcc") {
+		if k, v, ok := strings.Cut(a[i], "="); ok && (k == "-xc" || k == "-dfp" || k == "-ipe" || k == "-power" || k == "-gcc" || k == "-auto") {
 			switch k {
 			case "-xc":
 				o.xc = v
@@ -611,6 +615,8 @@ func main() {
 				o.power = v
 			case "-gcc":
 				o.gcc = v
+			case "-auto":
+				o.auto = v
 			}
 			i++
 			continue
