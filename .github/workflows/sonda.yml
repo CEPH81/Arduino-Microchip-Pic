@@ -19,9 +19,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /opt/microchip
-          key: xc-8v3.10-16v2.10-32v5.00
+          key: xc-8v2.50-8v3.10-16v2.10-32v5.00
+          restore-keys: xc-8v3.10-16v2.10-32v5.00
       - name: Instalar XC8, XC16 y XC32
-        if: steps.cache.outputs.cache-hit != 'true'
         run: bash tools/instalar_xc.sh
       - name: Sonda
         run: bash tools/sonda.sh
