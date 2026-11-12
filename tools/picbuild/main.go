@@ -286,68 +286,6 @@ func salirSi(err error) {
 
 // ---------------------------------------------------------------- sketch
 
-var (
-	reObjeto = regexp.MustCompile(`\b(Serial[0-9]?|Wire|SPI|EEPROM)\s*\.\s*([A-Za-z_]\w*)\s*\(`)
-	reVacio  = regexp.MustCompile(`\b(Serial[0-9]?__println)\(\s*\)`)
-	reChar   = regexp.MustCompile(`\b(Serial[0-9]?__(?:print|println))\(\s*'((?:\\.|[^\\'])+)'\s*\)`)
-)
-
-// Convierte la sintaxis de objetos de Arduino a las macros en C del núcleo.
-// Solo toca código: respeta cadenas, caracteres y comentarios.
-func convertir(src []byte) []byte {
-	var out bytes.Buffer
-	code := func(b []byte) {
-		b = reObjeto.ReplaceAll(b, []byte("${1}__${2}("))
-		out.Write(b)
-	}
-	i, ini := 0, 0
-	n := len(src)
-	for i < n {
-		c := src[i]
-		switch {
-		case c == '"' || c == '\'':
-			code(src[ini:i])
-			j := i + 1
-			for j < n && src[j] != c && src[j] != '\n' {
-				if src[j] == '\\' {
-					j++
-				}
-				j++
-			}
-			if j < n {
-				j++
-			}
-			out.Write(src[i:j])
-			i, ini = j, j
-		case c == '/' && i+1 < n && src[i+1] == '/':
-			code(src[ini:i])
-			j := i
-			for j < n && src[j] != '\n' {
-				j++
-			}
-			out.Write(src[i:j])
-			i, ini = j, j
-		case c == '/' && i+1 < n && src[i+1] == '*':
-			code(src[ini:i])
-			j := bytes.Index(src[i+2:], []byte("*/"))
-			if j < 0 {
-				j = n
-			} else {
-				j += i + 4
-			}
-			out.Write(src[i:j])
-			i, ini = j, j
-		default:
-			i++
-		}
-	}
-	code(src[ini:])
-	// Serial.print('A') imprime la letra, como en Arduino (en C 'A' es un int)
-	b := reChar.ReplaceAll(out.Bytes(), []byte(`${1}("${2}")`))
-	// Serial.println() sin argumentos
-	return reVacio.ReplaceAll(b, []byte("${1}0()"))
-}
-
 func esSketch(src string) bool { return strings.HasSuffix(strings.ToLower(src), ".ino.cpp") }
 
 // Deja en 'dst' (un .c) la fuente lista para un compilador de C

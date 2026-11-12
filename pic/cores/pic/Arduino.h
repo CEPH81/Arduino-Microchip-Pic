@@ -105,12 +105,19 @@ void    Serial_printkf(uint8_t digits, ...);
 /*
  * Serial.print(x) / Serial.print(x, base): la macro averigua el tipo de x
  * al compilar y se lo pasa a Serial_printk() como un número:
- *   1 texto (char*)   2 char (imprime la letra)   3 float / double
+ *   1 texto (char*)   2 char (imprime la letra)
  *   4 unsigned int    5 int    6 unsigned long    7 long
  * PIC_C() convierte la comprobación de tipos en una constante normal
  * (sizeof de un arreglo), que es lo que entienden los tres compiladores.
- * Los float van por Serial_printkf(): si el programa no imprime ninguno,
- * el código de punto flotante no entra en la flash.
+ *
+ * Números con decimales: van por Serial__printF() -> Serial_printkf().
+ *  - XC8 no descarta la rama que no se usa de un "?:" y metería todo el
+ *    código de punto flotante (~1700 palabras) en cada programa. Por eso
+ *    picbuild marca en el sketch las llamadas que imprimen un float
+ *    (Serial.print(3.14), Serial.print(voltios, 2)...) y las cambia a
+ *    Serial__printF(). Si se le escapa una, la compilación falla en
+ *    PIC_KIND (arreglo de tamaño negativo): escriba Serial.print((float)x).
+ *  - XC16 y XC32 (GCC) sí la descartan: ahí la macro elige sola.
  */
 #define PIC_C(e)        (sizeof(char[1 + (e)]) - 1u)
 #define PIC_T(x)        __typeof__((x) + 0)
@@ -121,12 +128,21 @@ void    Serial_printkf(uint8_t digits, ...);
                          __builtin_types_compatible_p(__typeof__(x), unsigned char) || \
                          __builtin_types_compatible_p(__typeof__(x), unsigned short))
 #define PIC_IS_CHAR(x)  __builtin_types_compatible_p(__typeof__(x), char)
-#define PIC_KIND(x)     ((uint8_t)PIC_C(PIC_IS_STR(x) ? 1 : PIC_IS_CHAR(x) ? 2 : \
+/* un float sin marcar da -2: arreglo de tamaño negativo = error al compilar */
+#define PIC_KIND(x)     ((uint8_t)PIC_C(PIC_IS_FLT(x) ? -2 : PIC_IS_STR(x) ? 1 : PIC_IS_CHAR(x) ? 2 : \
                          (PIC_IS_UNS(x) ? 4 : 5) + (sizeof((x) + 0) > sizeof(int) ? 2 : 0)))
 #define PIC_PRINT_DEF   0xFFu      /* base 10, o 2 decimales */
 
-#define PIC_PRINT2(x, b) \
-  (PIC_C(PIC_IS_FLT(x)) ? Serial_printkf((uint8_t)(b), (x)) : Serial_printk(PIC_KIND(x), (uint8_t)(b), (x)))
+#define PIC_PRINTF2(x, d)  Serial_printkf((uint8_t)(d), (double)(x))
+#define PIC_PRINTF1(x)     PIC_PRINTF2(x, PIC_PRINT_DEF)
+#if defined(PIC_8BIT)
+  #define PIC_PRINT2(x, b) Serial_printk(PIC_KIND(x), (uint8_t)(b), (x))
+#else
+  #define PIC_PRINT2(x, b) \
+    (PIC_C(PIC_IS_FLT(x)) ? Serial_printkf((uint8_t)(b), (x)) : \
+     Serial_printk((uint8_t)PIC_C(PIC_IS_STR(x) ? 1 : PIC_IS_CHAR(x) ? 2 : \
+                   (PIC_IS_UNS(x) ? 4 : 5) + (sizeof((x) + 0) > sizeof(int) ? 2 : 0)), (uint8_t)(b), (x)))
+#endif
 #define PIC_PRINT1(x)   PIC_PRINT2(x, PIC_PRINT_DEF)
 #define PIC_PRINT_SEL(a, b, macro, ...)  macro
 
@@ -140,6 +156,8 @@ void    Serial_printkf(uint8_t digits, ...);
 #define Serial__print(...)      PIC_PRINT_SEL(__VA_ARGS__, PIC_PRINT2, PIC_PRINT1, 0)(__VA_ARGS__)
 #define Serial__println(...)    do { Serial__print(__VA_ARGS__); Serial_println0(); } while (0)
 #define Serial__println0()      Serial_println0()
+#define Serial__printF(...)     PIC_PRINT_SEL(__VA_ARGS__, PIC_PRINTF2, PIC_PRINTF1, 0)(__VA_ARGS__)
+#define Serial__printlnF(...)   do { Serial__printF(__VA_ARGS__); Serial_println0(); } while (0)
 #endif /* PIC_HAS_SERIAL */
 
 #endif /* Arduino_h */
