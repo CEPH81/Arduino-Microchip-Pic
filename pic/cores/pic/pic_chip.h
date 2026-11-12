@@ -43,7 +43,7 @@
     #define PIC_HAS_LAT     1
   #endif
   /* USART / EUSART / UART */
-  #if defined(TXSTA) || defined(U1CON0)
+  #if defined(TXSTA) || defined(TX1STA) || defined(U1CON0)
     #define PIC_HAS_SERIAL  1
   #endif
 #elif defined(__XC16__) || defined(__XC_DSC__) || defined(__dsPIC33E__) || defined(__dsPIC33C__) || defined(__PIC24F__)

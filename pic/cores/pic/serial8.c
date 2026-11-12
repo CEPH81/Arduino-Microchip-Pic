@@ -1,8 +1,8 @@
 /*
  * serial8.c - Serial por el USART/EUSART de los PIC de 8 bits.
  *
- *  - PIC16F88/690/87x, 16F1947, 16F15385, 16F18877, PIC18F2xxx:
- *    TXSTA / RCSTA / SPBRG (con BRG16 donde existe).
+ *  - PIC16F88/690/87x, PIC18F2xxx: TXSTA / RCSTA / SPBRG (con BRG16 donde
+ *    existe); 16F1947, 16F15385, 16F18877: los mismos con nombre TX1STA...
  *  - PIC18F57Q84: UART1 nuevo (U1CON0, U1BRG, U1TXB, U1RXB).
  *  - En los chips con PPS se conectan PIN_SERIAL_TX y PIN_SERIAL_RX.
  *
@@ -56,6 +56,17 @@ int Serial_peek(void) { return -1; }
 
 #else
 /* ------------------------------------------------------ USART / EUSART */
+/* PIC16F1947, 16F15385 y 16F18877 numeran el primer EUSART (TX1STA...) */
+#if !defined(TXSTA) && defined(TX1STA)
+  #define TXSTA      TX1STA
+  #define TXSTAbits  TX1STAbits
+  #define RCSTA      RC1STA
+  #define RCSTAbits  RC1STAbits
+  #define TXREG      TX1REG
+  #define RCREG      RC1REG
+  #define SPBRG      SP1BRGL
+  #define SPBRGH     SP1BRGH
+#endif
 #if defined(_16F15385)
   #define TX_IF  PIR3bits.TX1IF
   #define RC_IF  PIR3bits.RC1IF

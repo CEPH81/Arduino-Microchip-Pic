@@ -531,10 +531,10 @@ func cmdSize(o *opciones) {
 		// informe de memoria del enlazador (--report-mem)
 		b, _ := os.ReadFile(base + ".mem")
 		prog, data := "0", "0"
-		if m := regexp.MustCompile(`(?m)Total program memory used \(bytes\):\s+0x[0-9a-fA-F]+\s+\((\d+)\)`).FindSubmatch(b); m != nil {
+		if m := regexp.MustCompile(`(?m)Total "?program"? memory used \(bytes\):\s+0x[0-9a-fA-F]+\s+\((\d+)\)`).FindSubmatch(b); m != nil {
 			prog = string(m[1])
 		}
-		if m := regexp.MustCompile(`(?m)Total data memory used \(bytes\):\s+0x[0-9a-fA-F]+\s+\((\d+)\)`).FindSubmatch(b); m != nil {
+		if m := regexp.MustCompile(`(?m)Total "?data"? memory used \(bytes\):\s+0x[0-9a-fA-F]+\s+\((\d+)\)`).FindSubmatch(b); m != nil {
 			data = string(m[1])
 		}
 		fmt.Printf("FLASH %s\nRAM %s\n", prog, data)

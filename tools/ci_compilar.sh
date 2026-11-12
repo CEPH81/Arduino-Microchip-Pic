@@ -8,11 +8,13 @@ mkdir -p "$H" && rm -rf "$H/pic" && ln -s "$R/pic" "$H/pic"
 "$R/pic/tools/picbuild" donde
 PLACAS=${*:-$(grep -o '^[a-z0-9]*\.name=' "$R/pic/boards.txt" | cut -d. -f1)}
 SIN_SERIAL="pic16f84 pic16f84a pic16f872"
+POCA_FLASH="pic16f870"      # 2 K palabras: no cabe el ejemplo con float
 ok=0; mal=0; L=/tmp/pic-logs; mkdir -p $L
 for b in $PLACAS; do
   for e in "$R"/pic/libraries/*/examples/*/; do
     n=$(basename "$e")
     case " $SIN_SERIAL " in *" $b "*) grep -q 'Serial' "$e/$n.ino" && continue ;; esac
+    case " $POCA_FLASH " in *" $b "*) grep -q 'float' "$e/$n.ino" && continue ;; esac
     if arduino-cli compile --fqbn CEPH81:pic:$b --build-path /tmp/b/$b/$n "$e" > $L/$b-$n.log 2>&1; then
       ok=$((ok+1)); echo "OK   $b $n $(grep -o '[0-9]* bytes' $L/$b-$n.log | head -2 | tr '\n' ' ')"
     else
